@@ -238,6 +238,8 @@ classdef DiffractionPatterns
         end
         
         function [autocorr,rho_final_shift,shift_directspace] = calc_autocorr_shift_object(rho_1,rho_2,X,Y,Z,X_recip,Y_recip,Z_recip)
+            origin_space = round(size(X)./2);
+            origin_space = origin_space + [1 1 1];
             
             fft_rho_original = fftn(rho_1);
             fft_rho_final = fftn(rho_2);
@@ -252,15 +254,11 @@ classdef DiffractionPatterns
             [r,c,p] = ind2sub(size(autocorr),idx);
             
             % multiply by phase ramp FT of object:
-            shift_directspace = [X(r,c,p) - X(65,65,65) Y(r,c,p) - Y(65,65,65) Z(r,c,p) - Z(65,65,65)];            
+            shift_directspace = [X(r,c,p) - X(origin_space(1),origin_space(2),origin_space(3)) Y(r,c,p) - Y(origin_space(1),origin_space(2),origin_space(3)) Z(r,c,p) - Z(origin_space(1),origin_space(2),origin_space(3))];            
             %rho_final_shift = rho_2 + shift_directspace(1);
             fft_rho_final_shift = fft_rho_final.*exp(-1i*(shift_directspace(1)*X_recip + shift_directspace(2)*Y_recip + shift_directspace(3)*Z_recip));
 
-            % use pixels:
-            shift_pixels = [r-65 c-65 p-65];
-            rho_final_shift_pixel = circshift(rho_2,shift_pixels); 
-            
-            rho_final_shift = ifftn(fft_rho_final_shift);
+             rho_final_shift = ifftn(fft_rho_final_shift);
             
         end
         
